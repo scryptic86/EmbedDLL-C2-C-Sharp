@@ -1,0 +1,8 @@
+{
+  "GUID": "...",
+  "Type": 0,
+  "Meta": "",
+  "IV": "base64",
+  "EncryptedMessage": "base64",
+  "HMAC": "base64"
+}
