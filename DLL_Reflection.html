@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>EmbedDLL Malware Execution Flow</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #0c1a2d 0%, #1a2b3c 100%);
+            color: white;
+            padding: 30px;
+            margin: 0;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: rgba(25, 35, 50, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+            border: 2px solid #3a506b;
+        }
+        .header {
+            text-align: center;
+            padding: 25px;
+            background: linear-gradient(90deg, #1e3a8a, #3730a3);
+            border-radius: 16px;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            font-size: 34px;
+            margin: 0 0 10px 0;
+        }
+        .header p {
+            font-size: 18px;
+            color: #cbd5e1;
+            margin: 0;
+        }
+        .flow-step {
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+            margin: 25px 0;
+            position: relative;
+            color: #1e293b;
+            border-left: 8px solid #3b82f6;
+        }
+        .step-number {
+            position: absolute;
+            left: -15px;
+            top: -15px;
+            width: 40px;
+            height: 40px;
+            background: #3b82f6;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+        }
+        .step-title {
+            font-size: 22px;
+            font-weight: bold;
+            padding-left: 35px;
+        }
+        .step-description {
+            font-size: 15px;
+            padding-left: 35px;
+            margin-top: 8px;
+            color: #475569;
+        }
+        .arrow {
+            text-align: center;
+            font-size: 26px;
+            color: #60a5fa;
+        }
+        .note-box, .registry-box, .lolbin {
+            margin-left: 35px;
+            margin-top: 12px;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        .note-box {
+            background: #f0f9ff;
+            border-left: 5px solid #0ea5e9;
+        }
+        .registry-box {
+            background: #fef2f2;
+            border-left: 5px solid #dc2626;
+        }
+        .lolbin {
+            background: #fef3c7;
+            border: 2px dashed #d97706;
+        }
+        .badge {
+            background: #dc2626;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            margin-left: 8px;
+        }
+        .registry-path {
+            font-family: Consolas, monospace;
+            background: #fee2e2;
+            padding: 6px 10px;
+            margin-top: 6px;
+            border-radius: 6px;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            font-size: 13px;
+            color: #94a3b8;
+        }
+    </style>
+</head>
+
+<body>
+<div class="container">
+
+    <div class="header">
+        <h1>EmbedDLL Malware Execution Flow</h1>
+        <p>Managed DLL Loader with Encrypted Embedded Payload & LOLBIN Persistence</p>
+    </div>
+
+    <div class="flow-step">
+        <div class="step-number">1</div>
+        <div class="step-title">DLL Loaded by Host Process</div>
+        <div class="step-description">
+            The malicious DLL is loaded by a legitimate Windows process, initiating execution within a trusted context.
+        </div>
+    </div>
+
+    <div class="arrow">▼</div>
+
+    <div class="flow-step">
+        <div class="step-number">2</div>
+        <div class="step-title">.NET Runtime Initialization</div>
+        <div class="step-description">
+            The Common Language Runtime (CLR) initializes and loads the managed assembly into memory.
+        </div>
+    </div>
+
+    <div class="arrow">▼</div>
+
+    <div class="flow-step">
+        <div class="step-number">3</div>
+        <div class="step-title">EmbedDLL Namespace Identified</div>
+        <div class="step-description">
+            Execution enters the <strong>EmbedDLL</strong> namespace, indicating embedded resource–based payload delivery.
+        </div>
+    </div>
+
+    <div class="arrow">▼</div>
+
+    <div class="flow-step">
+        <div class="step-number">4</div>
+        <div class="step-title">Program Class Execution</div>
+        <div class="step-description">
+            The Program class functions as the logical entry point for malicious execution flow.
+        </div>
+    </div>
+
+    <div class="arrow">▼</div>
+
+    <div class="flow-step">
+        <div class="step-number">5</div>
+        <div class="step-title">embed() Method Invoked</div>
+        <div class="step-description">
+            The embed() method orchestrates payload extraction, decryption, and deployment.
+        </div>
+    </div>
+
+    <div class="arrow">▼</div>
+
+    <div class="flow-step">
+        <div class="step-number">6</div>
+        <div class="step-title">Encrypted Resources Retrieved</div>
+        <div class="step-description">
+            Encrypted Base64-encoded payloads are extracted directly from the DLL’s embedded resources.
+        </div>
+        <div class="note-box">
+            Payloads are never stored in plaintext within the binary, hindering static analysis.
+        </div>
+    </div>
+
+    <div class="arrow">▼</div>
+
+    <div class="flow-step">
+        <div class="step-number">7</div>
+        <div class="step-title">Custom Decryption Routine Executed</div>
+        <div class="step-description">
+            A bespoke symmetric decryption function decrypts payload data using hardcoded parameters.
+        </div>
+    </div>
+
+    <div class="arrow">▼</div>
+
+    <div class="flow-step">
+        <div class="step-number">8</div>
+        <div class="step-title">Secondary Payload Materialized</div>
+        <div class="step-description">
+            Decrypted data is reconstructed into a secondary .NET assembly and supporting artifacts.
+        </div>
+    </div>
+
+    <div class="arrow">▼</div>
+
+    <div class="flow-step">
+        <div class="step-number">9</div>
+        <div class="step-title">Artifacts Written to Disk</div>
+        <div class="step-description">
+            The malware drops execution scaffolding required for LOLBIN-based execution.
+        </div>
+        <div class="note-box">
+            • embed.xml — malicious MSBuild project<br>
+            • embed.vbs — script used to launch MSBuild
+        </div>
+    </div>
+
+    <div class="arrow">▼</div>
+
+    <div class="flow-step">
+        <div class="step-number">10</div>
+        <div class="step-title">Registry Persistence Established <span class="badge">PERSISTENCE</span></div>
+        <div class="step-description">
+            A user-level Run key ensures execution on every logon without elevated privileges.
+        </div>
+        <div class="registry-box">
+            <div class="registry-path">
+                HKCU\Software\Microsoft\Windows\CurrentVersion\Run
+            </div>
+        </div>
+    </div>
+
+    <div class="arrow">▼</div>
+
+    <div class="flow-step">
+        <div class="step-number">11</div>
+        <div class="step-title">LOLBIN Execution via MSBuild <span class="badge">LOLBIN</span></div>
+        <div class="step-description">
+            embed.vbs launches MSBuild.exe to compile and execute malicious C# code from embed.xml.
+        </div>
+        <div class="lolbin">
+            Trusted Microsoft binaries are abused to evade detection and application controls.
+        </div>
+    </div>
+
+    <div class="footer">
+        Malware Analysis Report – EmbedDLL Execution & Persistence Chain
+    </div>
+
+</div>
+</body>
+</html>
