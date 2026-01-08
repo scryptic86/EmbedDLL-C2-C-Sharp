@@ -1,4 +1,4 @@
-
+This report is not quite finished. I still have to complete Advanced Dynamic Analysis of the DLL after exporting near-source code and creating a working .NET project so I can actually run it.
  
 
 Practical Malware Analysis & Triage
