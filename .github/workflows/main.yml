@@ -1,7 +1,9 @@
-# Auto-convert EmbedDLL_C2_Dropper-Loader_FINAL.docx -> README.md
-# Triggers:
-#  - when the DOCX is changed
-#  - manually via "Run workflow"
+name: Docx to README
+
+# Allow the workflow token to write repository contents
+permissions:
+  contents: write
+
 on:
   push:
     paths:
@@ -13,10 +15,11 @@ jobs:
   convert:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
+      - name: Checkout repository (with token)
         uses: actions/checkout@v4
         with:
           persist-credentials: true
+          # token is the default GITHUB_TOKEN, no need to pass explicitly here
 
       - name: Install pandoc
         run: |
@@ -28,30 +31,25 @@ jobs:
           DOCX="EmbedDLL_C2_Dropper-Loader_FINAL.docx"
           OUT="README.md"
           MEDIA_DIR="docx-media"
-          # remove previous extracted media to avoid stale files
           rm -rf "$MEDIA_DIR"
-          # convert to GitHub-flavored Markdown and extract media
           pandoc -f docx -t gfm "$DOCX" --extract-media="$MEDIA_DIR" -o "$OUT"
-          # fail if conversion produced no README (catch errors)
           test -s "$OUT"
-
-          # stage generated files (README and media if present)
           git add "$OUT" || true
-          if [ -d "$MEDIA_DIR" ]; then
-            git add "$MEDIA_DIR" || true
-          fi
+          if [ -d "$MEDIA_DIR" ]; then git add "$MEDIA_DIR" || true; fi
 
       - name: Commit & push converted README
         env:
           GIT_AUTHOR_NAME: "github-actions[bot]"
           GIT_AUTHOR_EMAIL: "41898282+github-actions[bot]@users.noreply.github.com"
+          REPO_URL: "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
         run: |
+          # use the token in the origin URL to ensure git push uses it
+          git remote set-url origin "$REPO_URL"
           git config user.name "${GIT_AUTHOR_NAME}"
           git config user.email "${GIT_AUTHOR_EMAIL}"
-          # only commit if there are staged changes
           if git diff --cached --quiet; then
             echo "No changes to commit."
             exit 0
           fi
           git commit -m "Auto-convert DOCX to README.md"
-          git push
+          git push origin HEAD:main
