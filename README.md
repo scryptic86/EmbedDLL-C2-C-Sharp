@@ -1,8 +1,3 @@
-This report is not quite finished. I still have to complete Advanced Dynamic Analysis of the DLL. 
-
-I have created a .NET console application to load the DLL and fixed some code so it runs.
- 
-
 Practical Malware Analysis & Triage
 Malware Analysis Report
 
@@ -284,7 +279,12 @@ Static Analysis Key Findings
 
 
 Advanced Dynamic Analysis
-{Screenshots and description about advanced dynamic artifacts and methods}
+
+This report is not quite finished. I still have to complete Advanced Dynamic Analysis of the DLL. 
+
+I have created a .NET console application to load the DLL and fixed some code so it runs.
+ 
+
 
  
 Indicators of Compromise
@@ -474,3 +474,5 @@ T1218.005 – Signed Binary Proxy Execution: MSBuild
 T1547.001 – Registry Run Keys
 T1071.001 – Application Layer Protocol: Web
 T1041 – Exfiltration Over C2 Channel
+
+
