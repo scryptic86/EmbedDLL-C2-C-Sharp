@@ -12,67 +12,57 @@ January 2, 2026 \| Clinton Asprey\| v1.0
 
 # Table of Contents
 
-[Table of Contents [3](#_Toc218260620)](#_Toc218260620)
-
-[Executive Summary [4](#executive-summary)](#executive-summary)
+[Executive Summary [3](#executive-summary)](#executive-summary)
 
 [High-Level Technical Summary
-[5](#high-level-technical-summary)](#high-level-technical-summary)
+[4](#high-level-technical-summary)](#high-level-technical-summary)
+
+[Execution Timeline [5](#execution-timeline)](#execution-timeline)
 
 [Malware Composition [7](#malware-composition)](#malware-composition)
 
 [EmbedDLL.dll [7](#embeddll.dll)](#embeddll.dll)
 
-[embed.vbs: [7](#_Toc218260625)](#_Toc218260625)
+[embed.vbs: [7](#_Toc220165545)](#_Toc220165545)
 
-[embed.xml: [7](#_Toc218260626)](#_Toc218260626)
+[embed.xml: [8](#_Toc220165546)](#_Toc220165546)
 
 [Basic Static Analysis
 [9](#basic-static-analysis)](#basic-static-analysis)
 
 [Basic Dynamic Analysis
-[11](#basic-dynamic-analysis)](#basic-dynamic-analysis)
+[13](#basic-dynamic-analysis)](#basic-dynamic-analysis)
 
 [Advanced Static Analysis
-[16](#advanced-static-analysis)](#advanced-static-analysis)
+[18](#advanced-static-analysis)](#advanced-static-analysis)
 
 [Advanced Dynamic Analysis
-[17](#advanced-dynamic-analysis)](#advanced-dynamic-analysis)
+[20](#advanced-dynamic-analysis)](#advanced-dynamic-analysis)
 
 [Indicators of Compromise
-[18](#indicators-of-compromise)](#indicators-of-compromise)
+[21](#indicators-of-compromise)](#indicators-of-compromise)
 
-[Network Indicators [18](#network-indicators)](#network-indicators)
+[Stage 1 Indicators of Compromise
+[22](#stage-1-indicators-of-compromise)](#stage-1-indicators-of-compromise)
 
-[Host-based Indicators
-[19](#host-based-indicators)](#host-based-indicators)
+[Stage 2 Indicators of Compromise
+[22](#stage-2-indicators-of-compromise)](#stage-2-indicators-of-compromise)
 
-[Rules & Signatures [21](#rules-signatures)](#rules-signatures)
+[Rules & Signatures [25](#rules-signatures)](#rules-signatures)
 
-[Appendices [22](#appendices)](#appendices)
+[Appendices [29](#appendices)](#appendices)
 
-[A. Yara Rules [22](#yara-rules)](#yara-rules)
+[A. Yara Rules [29](#yara-rules)](#yara-rules)
 
-[B. Callback URLs [23](#callback-urls)](#callback-urls)
+[A. Callback URLs [30](#callback-urls)](#callback-urls)
 
-[C. Decompiled Code Snippets
-[23](#decompiled-code-snippets)](#decompiled-code-snippets)
+[B. Decompiled Code Snippets
+[30](#decompiled-code-snippets)](#decompiled-code-snippets)
 
-[Updated Indicators of Compromise (IOC)
-[24](#_Toc218260639)](#_Toc218260639)
-
-[Network IOCs [24](#_Toc218260640)](#_Toc218260640)
-
-[Host-Based IOCs [24](#_Toc218260641)](#_Toc218260641)
-
-[Analyst Summary [24](#analyst-summary)](#analyst-summary)
-
-[Executive Summary (Updated) [24](#_Toc218260643)](#_Toc218260643)
+[Analyst Summary [31](#analyst-summary)](#analyst-summary)
 
 [MITRE ATT&CK Technique Mapping
-[24](#mitre-attck-technique-mapping)](#mitre-attck-technique-mapping)
-
-[Execution Timeline [25](#execution-timeline)](#execution-timeline)
+[31](#mitre-attck-technique-mapping)](#mitre-attck-technique-mapping)
 
 # Executive Summary
 
@@ -115,6 +105,14 @@ initiated.
 
 8.  Encrypted C2 communication begins
 
+Stage 1: Initial loader executable
+
+Stage 2: In-memory DLL dropper / decryptor
+
+Stage 3: Persistent script-based builder / launcher
+
+Stage 4: Final implant / C2 agent
+
 <img src="docx-media/media/image2.png"
 style="width:5.53819in;height:9in" />
 
@@ -136,7 +134,7 @@ style="width:0.94175in;height:0.94175in" />
 *Figure 1: The hidden file name of Malware.cryptlib64.dll is
 EmbedDLL.dll which is detonated in this lab with rundll32.*
 
-<span id="_Toc218260625" class="anchor"></span>embed.vbs:
+<span id="_Toc220165545" class="anchor"></span>embed.vbs:
 
 <img src="docx-media/media/image4.png"
 style="width:6.5in;height:1.89583in" />
@@ -144,9 +142,7 @@ style="width:6.5in;height:1.89583in" />
 *Figure 2: embed.vbs VBscript dropped by EmbedDLL.dll and ran upon user
 login*
 
-<span id="_Toc218260626" class="anchor"></span>
-
-embed.xml:
+<span id="_Toc220165546" class="anchor"></span>embed.xml:
 
 <img src="docx-media/media/image5.png"
 style="width:6.5in;height:2.84375in" />
@@ -156,6 +152,8 @@ style="width:6.5in;height:2.84375in" />
 # Basic Static Analysis
 
 {Screenshots and description about basic static artifacts and methods}
+
+**Stage 1: Encrypted Payload Dropper and Persistence**
 
 - **Filename:** Malware.cryptlib64.dll
 
@@ -209,6 +207,47 @@ AES_Encrypt
 > MemoryStream
 
 **Suspicious Strings:**
+
+**Final Stage: C2 Malware**
+
+**SHA256:**
+B8E0EC99C18BF28062FFB9BB385C0109A27AF71D332BC7FC00580D88D3A30721
+
+.**NET Module Name:** bk1ha411.4nu.exe
+
+**Entropy:** 5.181
+
+**File Size:** 11776 bytes
+
+**File Type:** MZ
+
+**Architecture:** 64-bit, GUI
+
+**Notable Embedded Strings and Indicators**
+
+- **Hardcoded C2 endpoint:**  
+  http://srv.masterchiefsgruntemporium.local:80
+
+- **Beacon parameter format:**  
+  i=\<id\>&data={encrypted}&session=\<token\>
+
+- **HTTP masquerading:**
+
+  - User-Agent: Mozilla/5.0 (Windows NT 6.1)…Chrome/41.0…
+
+  - Cookie template: ASPSESSIONID={GUID}; SESSIONID=…
+
+- **Encrypted message structure:**
+
+> {"GUID":"{0}","Type":{1},"Meta":"{2}","IV":"{3}",
+>
+> "EncryptedMessage":"{4}","HMAC":"{5}"}
+
+- **Certificate pinning indicators:**  
+  UseCertPinning, ValidateCert, CovenantCertHash
+
+- **Framework identifiers:**  
+  GruntStager, ExecuteStager, CookieWebClient
 
 # Basic Dynamic Analysis
 
@@ -379,20 +418,40 @@ loaded at user logon*
 {Screenshots and description about advanced dynamic artifacts and
 methods}
 
+In order to debug Malware.cryptlib64.dll, this analyst created a .NET
+4.7.2 console application named Loader.exe in Visual Studio Community to
+load the DLL code. Loader.exe is not part of the original malware sample
+but is included in the IOCs table below since Malware.cryptlib64.dll is
+dependent upon another binary to execute its code.
+
+## Stage 1
+
+## Stage 2
+
+## Stage 3
+
+## Stage 4
+
+<img src="docx-media/media/image23.png"
+style="width:6.5in;height:1.94375in" />
+
 # Indicators of Compromise
 
 The full list of IOCs can be found in the Appendices.
 
-## Network Indicators
+## Stage 1 Indicators of Compromise
 
-Domains:  
-- hxxp://srv\[.\]masterchiefsgruntemporium\[.\]local  
-  
-Protocols:  
-- HTTP POST with Base64 AES-encrypted payloads  
-- AES-256-CBC with PBKDF2 (SHA1, 1000 iterations)
+| Category | Indicator              | Type           | Stage   | Description                                            |
+|----------|------------------------|----------------|---------|--------------------------------------------------------|
+| File     | Loader.exe             | Executable     | Stage 1 | Loads malicious DLL via reflection                     |
+| File     | Malware.cryptlib64.dll | DLL            | Stage 1 | Primary dropper and decryptor component                |
+| File     | embed.xml              | XML Payload    | Stage 1 | Contains decrypted Stage 2 payload                     |
+| File     | embed.vbs              | VBS Script     | Stage 1 | Executes decrypted payload and establishes persistence |
+| Registry | HKCU...\Run            | Run Key        | Stage 1 | Registry auto-start persistence mechanism              |
+| API      | Assembly.LoadFile      | Reflection API | Stage 1 | Dynamically loads malicious DLL into memory            |
+| Crypto   | AES_Decrypt            | Function Call  | Stage 1 | Decrypts embedded encrypted payload                    |
 
-<img src="docx-media/media/image23.png"
+<img src="docx-media/media/image24.png"
 style="width:6.5in;height:2.11042in" />
 
 *Fig 3: Wireshark packet capture of initial DNS query for callback to C2
@@ -400,21 +459,29 @@ server*
 
 *Fig 4:.*
 
-## Host-based Indicators
+## Stage 2 Indicators of Compromise
 
-Files:  
-- C:\Users\Public\embed.xml  
-- C:\Users\Public\Documents\embed.vbs  
-  
-Registry:  
-- HKCU\Software\Microsoft\Windows\CurrentVersion\Run\embed  
-  
-Processes:  
-- MSBuild.exe spawned from VBS
-
-<img src="docx-media/media/image24.png"
-style="width:6.20536in;height:5.77841in"
-alt="Graphical user interface, text, application, website Description automatically generated" />
+| Category       | Indicator                                                                                            | Type                   | Description                                                                       |
+|----------------|------------------------------------------------------------------------------------------------------|------------------------|-----------------------------------------------------------------------------------|
+| Network        | http://srv.masterchiefsgruntemporium.local:80                                                        | C2 URL                 | Hardcoded command-and-control endpoint used by the implant                        |
+| Network        | /en-us/index.html                                                                                    | URI Path               | Decoy HTTP path used during beaconing                                             |
+| Network        | /en-us/docs.html                                                                                     | URI Path               | Alternate decoy path for C2 communications                                        |
+| Network        | /en-us/test.html                                                                                     | URI Path               | Alternate decoy path for C2 communications                                        |
+| Network        | i=a19ea23062db990386a3a478cb89d52e&data={0}&session=75db-99b1-25fe4e9afbe58696-320bea73              | HTTP Parameter Pattern | Beacon request format containing implant ID, encrypted payload, and session token |
+| Network        | Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36 | User-Agent             | Hardcoded User-Agent string used to masquerade as Chrome traffic                  |
+| Network        | ASPSESSIONID={GUID}; SESSIONID=1552332971750                                                         | Cookie Template        | Session cookie format used for C2 communication                                   |
+| C2 Protocol    | {"GUID":"{0}","Type":{1},"Meta":"{2}","IV":"{3}","EncryptedMessage":"{4}","HMAC":"{5}"}              | JSON Message Format    | Encrypted C2 message structure containing IV, ciphertext, and HMAC                |
+| Host           | bk1ha411.4nu.exe                                                                                     | Filename               | Observed implant executable filename                                              |
+| Host           | bk1ha411.4nu                                                                                         | Implant ID             | Base implant name used internally by the malware                                  |
+| Crypto         | HMACSHA256                                                                                           | Algorithm              | Message authentication algorithm used to protect C2 traffic                       |
+| Crypto         | aFM+yqzILW3R/AY/pnxI8VIYvdjnPdfYw8Xlqy31tvU=                                                         | Base64 Key / Hash      | Embedded cryptographic material used for HMAC or key derivation                   |
+| Crypto         | c638eb59a8                                                                                           | Token / Identifier     | Short embedded identifier associated with encryption or session handling          |
+| TLS / Evasion  | UseCertPinning                                                                                       | Function Name          | Enables certificate pinning to prevent TLS interception                           |
+| TLS / Evasion  | ValidateCert                                                                                         | Function Name          | Custom certificate validation routine                                             |
+| TLS / Evasion  | CovenantCertHash                                                                                     | Certificate Hash Label | Pinned certificate hash associated with Covenant framework                        |
+| Malware Family | GruntStager                                                                                          | Class Name             | Covenant framework stager identifier                                              |
+| Malware Family | ExecuteStager                                                                                        | Function Name          | Primary routine responsible for staging payload execution                         |
+| Malware Family | CookieWebClient                                                                                      | Class Name             | Custom HTTP client wrapper used for C2 communications                             |
 
 # Rules & Signatures
 
