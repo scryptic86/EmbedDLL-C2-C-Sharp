@@ -117,29 +117,37 @@ jobs:
 
           python3 defang.py
 
-      - name: Validate defanging (sanity check)
+           - name: Validate defanging (sanity check)
         run: |
+          set -e
+
           echo "Checking for undefanged indicators..."
 
-          # Raw http://
-          if grep -n -i "\bhttp://" README.md | grep -v "hxxp://" | grep -v "```" > /dev/null; then
-            echo "ERROR: Found undefanged http:// URLs"
-            grep -n -i "\bhttp://" README.md
-            exit 1
+          # Check for raw http:// (excluding already defanged)
+          if grep -n -i "http://" README.md | grep -v -i "hxxp://" > /tmp/http_check.txt; then
+            if [ -s /tmp/http_check.txt ]; then
+              echo "ERROR: Found undefanged http:// URLs"
+              cat /tmp/http_check.txt
+              exit 1
+            fi
           fi
 
-          # Raw https://
-          if grep -n -i "\bhttps://" README.md | grep -v "hxxps://" | grep -v "```" > /dev/null; then
-            echo "ERROR: Found undefanged https:// URLs"
-            grep -n -i "\bhttps://" README.md
-            exit 1
+          # Check for raw https:// (excluding already defanged)
+          if grep -n -i "https://" README.md | grep -v -i "hxxps://" > /tmp/https_check.txt; then
+            if [ -s /tmp/https_check.txt ]; then
+              echo "ERROR: Found undefanged https:// URLs"
+              cat /tmp/https_check.txt
+              exit 1
+            fi
           fi
 
-          # Raw IPv4 addresses
-          if grep -n -E "\b([0-9]{1,3}\.){3}[0-9]{1,3}\b" README.md | grep -v "\[\.\]" | grep -v "```" > /dev/null; then
-            echo "ERROR: Found undefanged IPv4 addresses"
-            grep -n -E "\b([0-9]{1,3}\.){3}[0-9]{1,3}\b" README.md
-            exit 1
+          # Check for raw IPv4 addresses (excluding already defanged)
+          if grep -n -E "\b([0-9]{1,3}\.){3}[0-9]{1,3}\b" README.md | grep -v "\[\.\]" > /tmp/ip_check.txt; then
+            if [ -s /tmp/ip_check.txt ]; then
+              echo "ERROR: Found undefanged IPv4 addresses"
+              cat /tmp/ip_check.txt
+              exit 1
+            fi
           fi
 
           echo "Defanging validation passed."
