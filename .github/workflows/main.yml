@@ -6,7 +6,7 @@ permissions:
 on:
   push:
     paths:
-      - 'EmbedDLL_C2_Dropper-Loader_FINAL.docx'
+      - 'EmbedDLL_C2_Dropper-Loader_FINAL_DEFANGED.docx'
       - '.github/workflows/docx-to-readme.yml'
   workflow_dispatch: {}
 
