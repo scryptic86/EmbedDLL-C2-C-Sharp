@@ -322,7 +322,7 @@ AES_Encrypt
 **Notable Embedded Strings and Indicators**
 
 - **Hardcoded C2 endpoint:**  
-  http://srv.masterchiefsgruntemporium.local:80
+  hxxp://srv\[.\]masterchiefsgruntemporium\[.\]local:80
 
 - **Beacon parameter format:**  
   i=\<id\>&data={encrypted}&session=\<token\>
