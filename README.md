@@ -134,10 +134,10 @@ standalone.
 
 This loader mimics real-world execution patterns by:
 
-- Loading Mechanism: Using .NET Reflection APIs Assembly[.]LoadFile(),
-  MethodInfo[.]Invoke()
+- Loading Mechanism: Using .NET Reflection APIs Assembly\[.\]LoadFile(),
+  MethodInfo\[.\]Invoke()
 
-- Entry Point: Calling EmbedDLL[.]Program[.]embed() method
+- Entry Point: Calling EmbedDLL\[.\]Program\[.\]embed() method
 
 - Isolation: Running in a controlled VM with monitoring tools
 
@@ -232,7 +232,7 @@ style="width:6.5in;height:1.89583in" />
 *Figure 2: embed[.]vbs VBscript dropped by EmbedDLL[.]dll and ran upon user
 login*
 
-<span id="_Toc220233323" class="anchor"></span>embed[.]xml
+<span id="_Toc220233323" class="anchor"></span>embed\[.\]xml
 
 <img src="docx-media/media/image5.png"
 style="width:6.5in;height:2.84375in" />
@@ -408,7 +408,7 @@ style="width:6.5in;height:1.9125in" />
 <img src="docx-media/media/image17.png"
 style="width:6.5in;height:0.94306in" />
 
-*Figure : XML arguments for embed[.]vbs to run MSBuild*
+*Figure : XML arguments for embed\[.\]vbs to run MSBuild*
 
 <img src="docx-media/media/image18.png"
 style="width:6.5in;height:2.975in" />
@@ -567,9 +567,9 @@ server*
 | Category       | Indicator                                                                                            | Type                   | Description                                                                       |
 |----------------|------------------------------------------------------------------------------------------------------|------------------------|-----------------------------------------------------------------------------------|
 | Network        | hxxp://srv\[.\]masterchiefsgruntemporium\[.\]local:80                                                | C2 URL                 | Hardcoded command-and-control endpoint used by the implant                        |
-| Network        | /en-us/index[.]html                                                                                    | URI Path               | Decoy HTTP path used during beaconing                                             |
-| Network        | /en-us/docs[.]html                                                                                     | URI Path               | Alternate decoy path for C2 communications                                        |
-| Network        | /en-us/test[.]html                                                                                     | URI Path               | Alternate decoy path for C2 communications                                        |
+| Network        | /en-us/index\[.\]html                                                                                | URI Path               | Decoy HTTP path used during beaconing                                             |
+| Network        | /en-us/docs\[.\]html                                                                                 | URI Path               | Alternate decoy path for C2 communications                                        |
+| Network        | /en-us/test\[.\]html                                                                                 | URI Path               | Alternate decoy path for C2 communications                                        |
 | Network        | i=a19ea23062db990386a3a478cb89d52e&data={0}&session=75db-99b1-25fe4e9afbe58696-320bea73              | HTTP Parameter Pattern | Beacon request format containing implant ID, encrypted payload, and session token |
 | Network        | Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36 | User-Agent             | Hardcoded User-Agent string used to masquerade as Chrome traffic                  |
 | Network        | ASPSESSIONID={GUID}; SESSIONID=1552332971750                                                         | Cookie Template        | Session cookie format used for C2 communication                                   |
@@ -734,7 +734,7 @@ pxQRI8YJc6jVr3x45Y+ti/tT8W+3HpQHbcw1yZJQ9goNh...
 
 6.  **In-Memory Execution Indicators:**
 
-System[.]Reflection
+System\[.\]Reflection
 
 MemoryStream
 
@@ -747,11 +747,12 @@ MethodInfo[.]Invoke (implied)
 7.  **Script-based Secondary Execution:**
 
 U2V0IG9TaGVsbCA9IENyZWF0ZU9iamVjdCAoIldzY3JpcHQuU2hlbGwiKSAK... which
-converts to C:\Windows\Microsoft[.]NET\Framework\v4.0.30319\MSBuild[.]exe
+converts to
+C:\Windows\Microsoft\[.\]NET\Framework\v4.0.30319\MSBuild\[.\]exe
 
 8.  **LoL Execution Script Drop Location:**
 
-C:\Users\Public\Documents\embed[.]vbs
+C:\Users\Public\Documents\embed\[.\]vbs
 
 9.  **Persistence Mechanism Registry Key:**
 
@@ -808,7 +809,7 @@ rule EmbedDLL_PowerOverwhelming_AES_C2
 
         / Reflection loading /
 
-        \$reflect = "System[.]Reflection"
+        \$reflect = "System\[.\]Reflection"
 
     condition:
 
