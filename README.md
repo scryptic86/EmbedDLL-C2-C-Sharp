@@ -12,57 +12,90 @@ January 2, 2026 \| Clinton Asprey\| v1.0
 
 # Table of Contents
 
-[Executive Summary [3](#executive-summary)](#executive-summary)
+[Table of Contents [2](#_Toc220233315)](#_Toc220233315)
+
+[Executive Summary [4](#executive-summary)](#executive-summary)
+
+[Analysis Environment & Methodology
+[5](#analysis-environment-methodology)](#analysis-environment-methodology)
 
 [High-Level Technical Summary
-[4](#high-level-technical-summary)](#high-level-technical-summary)
+[7](#high-level-technical-summary)](#high-level-technical-summary)
 
-[Execution Timeline [5](#execution-timeline)](#execution-timeline)
+[Execution Timeline [8](#execution-timeline)](#execution-timeline)
 
-[Malware Composition [7](#malware-composition)](#malware-composition)
+[Malware Composition [10](#malware-composition)](#malware-composition)
 
-[EmbedDLL.dll [7](#embeddll.dll)](#embeddll.dll)
+[EmbedDLL.dll [10](#embeddll.dll)](#embeddll.dll)
 
-[embed.vbs: [7](#_Toc220165545)](#_Toc220165545)
+[embed.vbs [10](#_Toc220233322)](#_Toc220233322)
 
-[embed.xml: [8](#_Toc220165546)](#_Toc220165546)
+[embed.xml [11](#_Toc220233323)](#_Toc220233323)
 
 [Basic Static Analysis
-[9](#basic-static-analysis)](#basic-static-analysis)
+[12](#basic-static-analysis)](#basic-static-analysis)
+
+[Stage 1 - Loader [12](#_Toc220233325)](#_Toc220233325)
+
+[Stage 2 - EmbedDLL [13](#stage-1-embeddll.dll)](#stage-1-embeddll.dll)
+
+[Stage 3 – VBScript Launcher
+[15](#stage-2-vbscript-persistent-launcher)](#stage-2-vbscript-persistent-launcher)
+
+[Stage 4: C2 Agent
+[16](#stage-3-grunt-http-stager)](#stage-3-grunt-http-stager)
 
 [Basic Dynamic Analysis
-[13](#basic-dynamic-analysis)](#basic-dynamic-analysis)
+[17](#basic-dynamic-analysis)](#basic-dynamic-analysis)
+
+[Stage 1 [21](#_Toc220233330)](#_Toc220233330)
+
+[Stage 2 [21](#_Toc220233331)](#_Toc220233331)
+
+[Stage 3 [21](#_Toc220233332)](#_Toc220233332)
+
+[Stage 4 [21](#_Toc220233333)](#_Toc220233333)
 
 [Advanced Static Analysis
-[18](#advanced-static-analysis)](#advanced-static-analysis)
+[22](#advanced-static-analysis)](#advanced-static-analysis)
+
+[Stage 1 [24](#_Toc220233335)](#_Toc220233335)
+
+[Stage 2 [24](#_Toc220233336)](#_Toc220233336)
+
+[Stage 3 [24](#_Toc220233337)](#_Toc220233337)
+
+[Stage 4 [24](#_Toc220233338)](#_Toc220233338)
 
 [Advanced Dynamic Analysis
-[20](#advanced-dynamic-analysis)](#advanced-dynamic-analysis)
+[25](#advanced-dynamic-analysis)](#advanced-dynamic-analysis)
 
 [Indicators of Compromise
-[21](#indicators-of-compromise)](#indicators-of-compromise)
+[26](#indicators-of-compromise)](#indicators-of-compromise)
 
-[Stage 1 Indicators of Compromise
-[22](#stage-1-indicators-of-compromise)](#stage-1-indicators-of-compromise)
+[Stage 1 [26](#_Toc220233341)](#_Toc220233341)
 
-[Stage 2 Indicators of Compromise
-[22](#stage-2-indicators-of-compromise)](#stage-2-indicators-of-compromise)
+[Stage 2 [27](#_Toc220233342)](#_Toc220233342)
 
-[Rules & Signatures [25](#rules-signatures)](#rules-signatures)
+[Stage 3 [29](#_Toc220233343)](#_Toc220233343)
 
-[Appendices [29](#appendices)](#appendices)
+[Stage 4 [29](#_Toc220233344)](#_Toc220233344)
 
-[A. Yara Rules [29](#yara-rules)](#yara-rules)
+[Rules & Signatures [30](#rules-signatures)](#rules-signatures)
 
-[A. Callback URLs [30](#callback-urls)](#callback-urls)
+[Appendices [34](#appendices)](#appendices)
 
-[B. Decompiled Code Snippets
-[30](#decompiled-code-snippets)](#decompiled-code-snippets)
+[A. Yara Rules [34](#yara-rules)](#yara-rules)
 
-[Analyst Summary [31](#analyst-summary)](#analyst-summary)
+[B. Callback URLs [35](#callback-urls)](#callback-urls)
+
+[C. Decompiled Code Snippets
+[35](#decompiled-code-snippets)](#decompiled-code-snippets)
+
+[Analyst Summary [36](#analyst-summary)](#analyst-summary)
 
 [MITRE ATT&CK Technique Mapping
-[31](#mitre-attck-technique-mapping)](#mitre-attck-technique-mapping)
+[36](#mitre-attck-technique-mapping)](#mitre-attck-technique-mapping)
 
 # Executive Summary
 
@@ -76,6 +109,71 @@ static detection through AES-encrypted embedded resources and reflective
 assembly loading. Persistence is achieved via registry Run keys and
 execution is proxied through MSBuild. C2 server beaconing is also
 established.
+
+Analysis Note: The DLL sample (Malware.cryptlib64.dll) requires a
+hosting process for execution. For this analysis, a minimal .NET loader
+was created to facilitate dynamic analysis. The loader is not part of
+the malware distribution chain but serves as an analysis tool.
+
+# Analysis Environment & Methodology
+
+## Controlled Execution Setup
+
+To analyze the managed .NET DLL (Malware.cryptlib64.dll), a controlled
+execution environment was established. The DLL requires a hosting
+process, as it contains managed code entry points that cannot execute
+standalone.
+
+##  Custom Loader Implementation
+
+> To debug Malware.cryptlib64.dll, this analyst created a .NET 4.7.2
+> console application named Loader.exe in Visual Studio Community to
+> load the DLL code.
+>
+> **Loader.exe is not part of the original malware sample.**
+
+This loader mimics real-world execution patterns by:
+
+- Loading Mechanism: Using .NET Reflection APIs Assembly.LoadFile(),
+  MethodInfo.Invoke()
+
+- Entry Point: Calling EmbedDLL.Program.embed() method
+
+- Isolation: Running in a controlled VM with monitoring tools
+
+Loader Purpose: Enable observation of DLL’s core functionality
+independent of specific delivery chains.
+
+Real-World Equivalents: Similar loading techniques are observed in:
+
+- Office macro payloads
+
+- PowerShell/Cscript stagers
+
+- Exploit kit second-stage loaders
+
+- Legitimate process abuse (e.g., regsvr32, installutil)
+
+## Monitoring Tools & Setup
+
+- **Static Analysis:** Floss, PEStudio, Cutter
+
+- **Network:** Wireshark, FakeNet-NG, Inetsim
+
+- **System:** Process Monitor, API Monitor
+
+- **Memory:** System Informer
+
+- **.NET-specific:** dnSpy, dnSpy-x86
+
+## Assumptions & Limitations
+
+- The DLL's behavior is analyzed independent of initial infection vector
+
+- C2 infrastructure was simulated/isolated to prevent external
+  communication
+
+- All findings reflect the DLL's capabilities when properly loaded
 
 # High-Level Technical Summary
 
@@ -105,14 +203,6 @@ initiated.
 
 8.  Encrypted C2 communication begins
 
-Stage 1: Initial loader executable
-
-Stage 2: In-memory DLL dropper / decryptor
-
-Stage 3: Persistent script-based builder / launcher
-
-Stage 4: Final implant / C2 agent
-
 <img src="docx-media/media/image2.png"
 style="width:5.53819in;height:9in" />
 
@@ -134,7 +224,7 @@ style="width:0.94175in;height:0.94175in" />
 *Figure 1: The hidden file name of Malware.cryptlib64.dll is
 EmbedDLL.dll which is detonated in this lab with rundll32.*
 
-<span id="_Toc220165545" class="anchor"></span>embed.vbs:
+<span id="_Toc220233322" class="anchor"></span>embed.vbs
 
 <img src="docx-media/media/image4.png"
 style="width:6.5in;height:1.89583in" />
@@ -142,7 +232,7 @@ style="width:6.5in;height:1.89583in" />
 *Figure 2: embed.vbs VBscript dropped by EmbedDLL.dll and ran upon user
 login*
 
-<span id="_Toc220165546" class="anchor"></span>embed.xml:
+<span id="_Toc220233323" class="anchor"></span>embed.xml
 
 <img src="docx-media/media/image5.png"
 style="width:6.5in;height:2.84375in" />
@@ -153,11 +243,11 @@ style="width:6.5in;height:2.84375in" />
 
 {Screenshots and description about basic static artifacts and methods}
 
-**Stage 1: Encrypted Payload Dropper and Persistence**
+## Stage 1 – EmbedDLL.dll
 
-- **Filename:** Malware.cryptlib64.dll
+- **Filename: Malware.cryptlib64.dll**
 
-- **File size:** 29184 bytes
+- **File size: 29184** bytes
 
 - **Entropy:** 4.178
 
@@ -165,9 +255,9 @@ style="width:6.5in;height:2.84375in" />
 
 - **Architecture:** x64
 
-- **Compilation timestamp:** Sun Oct 10 18:14:49 2021 (UTC)
+- **Compilation timestamp: Sun** Oct 10 18:14:49 2021 (UTC)
 
-- **Digital signature:** None
+- **Digital signature: None**
 
 - **Suspicious sections:** .sdata
 
@@ -190,7 +280,9 @@ style="width:6.5in;height:3.8875in" />
 <img src="docx-media/media/image8.png"
 style="width:6.05052in;height:1.21677in" />
 
-*Figure : Indicators of C# language and .NET Framework*
+*Figure: Indicators of C# language and .NET Framework*
+
+**Notable Embedded Strings and Indicators**
 
 **Imported functions / APIs:**
 
@@ -208,20 +300,24 @@ AES_Encrypt
 
 **Suspicious Strings:**
 
-**Final Stage: C2 Malware**
+## Stage 2 – VBScript Persistent Launcher
 
-**SHA256:**
-B8E0EC99C18BF28062FFB9BB385C0109A27AF71D332BC7FC00580D88D3A30721
+**Notable Embedded Strings and Indicators**
 
-.**NET Module Name:** bk1ha411.4nu.exe
+## Stage 3: Grunt HTTP Stager
 
-**Entropy:** 5.181
+- Filen**ame:** bk1ha411.4nu.exe
 
-**File Size:** 11776 bytes
+- **SHA256:**
+  B8E0EC99C18BF28062FFB9BB385C0109A27AF71D332BC7FC00580D88D3A30721
 
-**File Type:** MZ
+- **Entropy:** 5.181
 
-**Architecture:** 64-bit, GUI
+- **File Size:** 11776 bytes
+
+- **File Type:** MZ
+
+- **Architecture:** x64
 
 **Notable Embedded Strings and Indicators**
 
@@ -248,6 +344,8 @@ B8E0EC99C18BF28062FFB9BB385C0109A27AF71D332BC7FC00580D88D3A30721
 
 - **Framework identifiers:**  
   GruntStager, ExecuteStager, CookieWebClient
+
+## Stage 4: Final Covenant Implant
 
 # Basic Dynamic Analysis
 
@@ -359,6 +457,14 @@ Total bytes: 64
 >
 > Checksum : 0x00005a13 (23059)
 
+## Stage 1 – EmbedDLL.dll
+
+## Stage 2 – VBScript Persistent Launcher
+
+## Stage 3: Grunt HTTP Stager
+
+## Stage 4: Final Covenant Implant
+
 # Advanced Static Analysis
 
 {Screenshots and description about findings during advanced static
@@ -413,45 +519,42 @@ loaded at user logon*
   packed and parsed messages instead of common serialization formats,
   indicating deliberate evasion of signature-based detection.
 
+## Stage 1 – EmbedDLL.dll
+
+## Stage 2 – VBScript Persistent Launcher
+
+## Stage 3: Grunt HTTP Stager
+
+## Stage 4: Final Covenant Implant
+
 # Advanced Dynamic Analysis
 
 {Screenshots and description about advanced dynamic artifacts and
 methods}
 
-In order to debug Malware.cryptlib64.dll, this analyst created a .NET
-4.7.2 console application named Loader.exe in Visual Studio Community to
-load the DLL code. Loader.exe is not part of the original malware sample
-but is included in the IOCs table below since Malware.cryptlib64.dll is
-dependent upon another binary to execute its code.
-
-## Stage 1
-
-## Stage 2
-
-## Stage 3
-
-## Stage 4
-
 <img src="docx-media/media/image23.png"
 style="width:6.5in;height:1.94375in" />
+
+<img src="docx-media/media/image24.png"
+style="width:6.5in;height:3.22986in" />
 
 # Indicators of Compromise
 
 The full list of IOCs can be found in the Appendices.
 
-## Stage 1 Indicators of Compromise
+## Stage 1 – EmbedDLL.dll
 
 | Category | Indicator              | Type           | Stage   | Description                                            |
 |----------|------------------------|----------------|---------|--------------------------------------------------------|
-| File     | Loader.exe             | Executable     | Stage 1 | Loads malicious DLL via reflection                     |
-| File     | Malware.cryptlib64.dll | DLL            | Stage 1 | Primary dropper and decryptor component                |
+|          |                        |                |         |                                                        |
+| File     | Malware.cryptlib64.dll | DLL            | Stage 1 | Primary dropper and decrypter component                |
 | File     | embed.xml              | XML Payload    | Stage 1 | Contains decrypted Stage 2 payload                     |
 | File     | embed.vbs              | VBS Script     | Stage 1 | Executes decrypted payload and establishes persistence |
 | Registry | HKCU...\Run            | Run Key        | Stage 1 | Registry auto-start persistence mechanism              |
 | API      | Assembly.LoadFile      | Reflection API | Stage 1 | Dynamically loads malicious DLL into memory            |
 | Crypto   | AES_Decrypt            | Function Call  | Stage 1 | Decrypts embedded encrypted payload                    |
 
-<img src="docx-media/media/image24.png"
+<img src="docx-media/media/image25.png"
 style="width:6.5in;height:2.11042in" />
 
 *Fig 3: Wireshark packet capture of initial DNS query for callback to C2
@@ -459,7 +562,7 @@ server*
 
 *Fig 4:.*
 
-## Stage 2 Indicators of Compromise
+## Stage 2 – VBScript Persistent Launcher
 
 | Category       | Indicator                                                                                            | Type                   | Description                                                                       |
 |----------------|------------------------------------------------------------------------------------------------------|------------------------|-----------------------------------------------------------------------------------|
@@ -482,6 +585,16 @@ server*
 | Malware Family | GruntStager                                                                                          | Class Name             | Covenant framework stager identifier                                              |
 | Malware Family | ExecuteStager                                                                                        | Function Name          | Primary routine responsible for staging payload execution                         |
 | Malware Family | CookieWebClient                                                                                      | Class Name             | Custom HTTP client wrapper used for C2 communications                             |
+
+## Stage 3: Grunt HTTP Stager
+
+## Stage 4: Final Covenant Implant
+
+Analysis Artifacts (NOT MALICIOUS)
+
+\- Loader.exe (custom analysis tool, SHA256: ...)
+
+\- Debug symbols from controlled execution
 
 # Rules & Signatures
 
@@ -669,21 +782,21 @@ rule EmbedDLL_PowerOverwhelming_AES_C2
 
     strings:
 
-        /\* Password (UTF-16LE) \*/
+        / Password (UTF-16LE) /
 
         \$pwd = "p0w3r0verwh3lm1ng!" wide
 
-        /\* PBKDF2 salt \*/
+        / PBKDF2 salt /
 
         \$salt = { 01 02 03 04 05 06 07 08 }
 
-        /\* .NET crypto \*/
+        / .NET crypto /
 
         \$rij = "RijndaelManaged"
 
         \$pbkdf = "Rfc2898DeriveBytes"
 
-        /\* JSON C2 fields \*/
+        / JSON C2 fields /
 
         \$json1 = "\\EncryptedMessage\\"
 
@@ -693,7 +806,7 @@ rule EmbedDLL_PowerOverwhelming_AES_C2
 
         \$json4 = "\\GUID\\"
 
-        /\* Reflection loading \*/
+        / Reflection loading /
 
         \$reflect = "System.Reflection"
 
@@ -701,7 +814,7 @@ rule EmbedDLL_PowerOverwhelming_AES_C2
 
         uint16(0) == 0x5A4D and   // PE
 
-        all of (\$json\*) and
+        all of (\$json) and
 
         \$salt and
 
