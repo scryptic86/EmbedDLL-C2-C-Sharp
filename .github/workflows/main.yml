@@ -46,29 +46,13 @@ jobs:
               text = re.sub(r'\bftp://',   'fxp://',   text, flags=re.IGNORECASE)
 
               # Defang IPv4 addresses
-              def defang_ipv4(match):
-                  return match.group(0).replace('.', '[.]')
-
               text = re.sub(
                   r'\b(?:(?:25[0-5]|2[0-4]\d|1?\d?\d)\.){3}(?:25[0-5]|2[0-4]\d|1?\d?\d)\b',
-                  defang_ipv4,
+                  lambda m: m.group(0).replace('.', '[.]'),
                   text
               )
 
-              # Defang domains (avoid already defanged ones and URLs)
-              def defang_domain(match):
-                  domain = match.group(0)
-                  if '[.]' in domain:
-                      return domain
-                  return domain.replace('.', '[.]')
-
-              text = re.sub(
-                  r'\b(?!hxxps?://|fxp://)([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}\b',
-                  defang_domain,
-                  text
-              )
-
-              # Defang IPv6 addresses (basic form)
+              # Defang IPv6 addresses
               text = re.sub(
                   r'\b([0-9a-fA-F]{1,4}:){2,7}[0-9a-fA-F]{1,4}\b',
                   lambda m: m.group(0).replace(':', '[:]'),
@@ -76,13 +60,31 @@ jobs:
               )
 
               # Defang email addresses
-              def defang_email(match):
-                  user, host = match.group(1), match.group(2)
-                  return user + '[@]' + host.replace('.', '[.]')
-
               text = re.sub(
                   r'\b([a-zA-Z0-9._%+-]+)@([a-zA-Z0-9.-]+\.[a-zA-Z]{2,})\b',
-                  defang_email,
+                  lambda m: m.group(1) + '[@]' + m.group(2).replace('.', '[.]'),
+                  text
+              )
+
+              # Defang domains BUT avoid:
+              # - image filenames (.png, .jpg, etc.)
+              # - markdown links and image links
+              def defang_domain(match):
+                  domain = match.group(0)
+
+                  # Skip common file extensions
+                  if domain.lower().endswith(('.png', '.jpg', '.jpeg', '.gif', '.svg', '.webp', '.bmp')):
+                      return domain
+
+                  # Skip already defanged
+                  if '[.]' in domain:
+                      return domain
+
+                  return domain.replace('.', '[.]')
+
+              text = re.sub(
+                  r'\b(?!hxxps?://|fxp://)([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}\b',
+                  defang_domain,
                   text
               )
 
@@ -92,14 +94,24 @@ jobs:
           with open('README.md', 'r', encoding='utf-8') as f:
               content = f.read()
 
-          # Preserve code blocks
           lines = content.split('\n')
           in_code_block = False
           processed = []
 
           for line in lines:
+              # Toggle fenced code blocks
               if line.strip().startswith('```'):
                   in_code_block = not in_code_block
+                  processed.append(line)
+                  continue
+
+              # Skip markdown image lines entirely
+              if line.strip().startswith('!['):
+                  processed.append(line)
+                  continue
+
+              # Skip markdown links (preserve link targets)
+              if '](' in line:
                   processed.append(line)
                   continue
 
@@ -108,14 +120,14 @@ jobs:
               else:
                   processed.append(defang_text(line))
 
-          # Write back
           with open('README.md', 'w', encoding='utf-8') as f:
               f.write('\n'.join(processed))
 
-          print("Defanging complete.")
+          print("Defanging complete (image-safe mode).")
           EOF
 
           python3 defang.py
+
 
       - name: Validate defanging (sanity check)
         run: |
