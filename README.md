@@ -1,4 +1,4 @@
-<img src="docx-media/media/image1[.]png"
+<img src="docx-media/media/image1.png"
 style="width:3.79167in;height:3.90712in"
 alt="Icon Description automatically generated" />
 
@@ -26,18 +26,18 @@ January 2, 2026 \| Clinton Asprey\| v1.0
 
 [Malware Composition [10](#malware-composition)](#malware-composition)
 
-[EmbedDLL[.]dll [10](#embeddll[.]dll)](#embeddll[.]dll)
+[EmbedDLL.dll [10](#embeddll.dll)](#embeddll.dll)
 
-[embed[.]vbs [10](#_Toc220233322)](#_Toc220233322)
+[embed.vbs [10](#_Toc220233322)](#_Toc220233322)
 
-[embed[.]xml [11](#_Toc220233323)](#_Toc220233323)
+[embed.xml [11](#_Toc220233323)](#_Toc220233323)
 
 [Basic Static Analysis
 [12](#basic-static-analysis)](#basic-static-analysis)
 
 [Stage 1 - Loader [12](#_Toc220233325)](#_Toc220233325)
 
-[Stage 2 - EmbedDLL [13](#stage-1-embeddll[.]dll)](#stage-1-embeddll[.]dll)
+[Stage 2 - EmbedDLL [13](#stage-1-embeddll.dll)](#stage-1-embeddll.dll)
 
 [Stage 3 – VBScript Launcher
 [15](#stage-2-vbscript-persistent-launcher)](#stage-2-vbscript-persistent-launcher)
@@ -203,7 +203,7 @@ initiated.
 
 8.  Encrypted C2 communication begins
 
-<img src="docx-media/media/image2[.]png"
+<img src="docx-media/media/image2.png"
 style="width:5.53819in;height:9in" />
 
 # Malware Composition
@@ -218,7 +218,7 @@ Malware[.]cryptlib64[.]dll consists of the following components:
 
 ## EmbedDLL[.]dll
 
-<img src="docx-media/media/image3[.]png"
+<img src="docx-media/media/image3.png"
 style="width:0.94175in;height:0.94175in" />
 
 *Figure 1: The hidden file name of Malware[.]cryptlib64[.]dll is
@@ -226,7 +226,7 @@ EmbedDLL[.]dll which is detonated in this lab with rundll32.*
 
 <span id="_Toc220233322" class="anchor"></span>embed[.]vbs
 
-<img src="docx-media/media/image4[.]png"
+<img src="docx-media/media/image4.png"
 style="width:6.5in;height:1.89583in" />
 
 *Figure 2: embed[.]vbs VBscript dropped by EmbedDLL[.]dll and ran upon user
@@ -234,7 +234,7 @@ login*
 
 <span id="_Toc220233323" class="anchor"></span>embed[.]xml
 
-<img src="docx-media/media/image5[.]png"
+<img src="docx-media/media/image5.png"
 style="width:6.5in;height:2.84375in" />
 
 *Figure 3: The XML payload is dropped in Public user folder*
@@ -267,17 +267,17 @@ style="width:6.5in;height:2.84375in" />
 
 - **Anti-analysis techniques observed:** Hidden File Name (EmbedDLL[.]dll)
 
-<img src="docx-media/media/image6[.]png"
+<img src="docx-media/media/image6.png"
 style="width:6.25888in;height:1.82516in" />
 
 *Figure : Hidden file name*
 
-<img src="docx-media/media/image7[.]png"
+<img src="docx-media/media/image7.png"
 style="width:6.5in;height:3.8875in" />
 
 *Figure : .NET module detected*
 
-<img src="docx-media/media/image8[.]png"
+<img src="docx-media/media/image8.png"
 style="width:6.05052in;height:1.21677in" />
 
 *Figure: Indicators of C# language and .NET Framework*
@@ -369,27 +369,27 @@ structured metadata such as opcode values, host identifiers, and status
 or command data. No evidence of secondary compression or obfuscation is
 present beyond the initial AES encryption layer.
 
-<img src="docx-media/media/image10[.]png"
+<img src="docx-media/media/image10.png"
 style="width:6.5in;height:1.51806in" />
 
-<img src="docx-media/media/image11[.]png"
+<img src="docx-media/media/image11.png"
 style="width:6.5in;height:0.22917in" />
 
 *Figure : ProcMon shows files dropped and registry key set upon first
 run*
 
-<img src="docx-media/media/image12[.]png"
+<img src="docx-media/media/image12.png"
 style="width:6.5in;height:1.73125in" />
 
 *Figure : Persistence registry key created after initial EmbedDLL[.]dll
 execution*
 
-<img src="docx-media/media/image13[.]png"
+<img src="docx-media/media/image13.png"
 style="width:6.5in;height:2.37083in" />
 
 *Figure : Wireshark packet capture showing HTTP call to C2 server*
 
-<img src="docx-media/media/image14[.]png"
+<img src="docx-media/media/image14.png"
 style="width:6.5in;height:2.14514in" />
 
 *Figure : Successful request on port 80*
@@ -399,23 +399,23 @@ executed with embed[.]xml arguments and the C2 server is contacted.
 VBScript is used to launch a system shell and run MSBuild indirectly to
 evade detection.
 
-<img src="docx-media/media/image15[.]png"
+<img src="docx-media/media/image15.png"
 style="width:6.5in;height:1.30764in" />
 
-<img src="docx-media/media/image16[.]png"
+<img src="docx-media/media/image16.png"
 style="width:6.5in;height:1.9125in" />
 
-<img src="docx-media/media/image17[.]png"
+<img src="docx-media/media/image17.png"
 style="width:6.5in;height:0.94306in" />
 
 *Figure : XML arguments for embed[.]vbs to run MSBuild*
 
-<img src="docx-media/media/image18[.]png"
+<img src="docx-media/media/image18.png"
 style="width:6.5in;height:2.975in" />
 
 *Figure : Ncat and Wireshark captured C2 beacon for decryption*
 
-<img src="docx-media/media/image19[.]png"
+<img src="docx-media/media/image19.png"
 style="width:6.44478in;height:1.52786in" />
 
 Figure : Exported HTML POST file from PCAP
@@ -480,17 +480,17 @@ which explains debugger errors such as *“invalid extension”* when
 attempting to run it in dnSpy. Instead, it is designed for **reflective
 or indirect loading.**
 
-<img src="docx-media/media/image20[.]png"
+<img src="docx-media/media/image20.png"
 style="width:6.5in;height:0.84236in" />
 
 *Figure : Hardcoded password and AES decryption of a base64 string*
 
-<img src="docx-media/media/image21[.]png"
+<img src="docx-media/media/image21.png"
 style="width:6.5in;height:1.67917in" />
 
 *Figure : AES encryption function*
 
-<img src="docx-media/media/image22[.]png"
+<img src="docx-media/media/image22.png"
 style="width:5.86051in;height:1.37345in" />
 
 *Figure : Name and location of dropped VBS script and XML file to be
@@ -532,10 +532,10 @@ loaded at user logon*
 {Screenshots and description about advanced dynamic artifacts and
 methods}
 
-<img src="docx-media/media/image23[.]png"
+<img src="docx-media/media/image23.png"
 style="width:6.5in;height:1.94375in" />
 
-<img src="docx-media/media/image24[.]png"
+<img src="docx-media/media/image24.png"
 style="width:6.5in;height:3.22986in" />
 
 # Indicators of Compromise
@@ -554,7 +554,7 @@ The full list of IOCs can be found in the Appendices.
 | API      | Assembly[.]LoadFile      | Reflection API | Stage 1 | Dynamically loads malicious DLL into memory            |
 | Crypto   | AES_Decrypt            | Function Call  | Stage 1 | Decrypts embedded encrypted payload                    |
 
-<img src="docx-media/media/image25[.]png"
+<img src="docx-media/media/image25.png"
 style="width:6.5in;height:2.11042in" />
 
 *Fig 3: Wireshark packet capture of initial DNS query for callback to C2
