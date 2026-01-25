@@ -117,7 +117,7 @@ jobs:
 
           python3 defang.py
 
-           - name: Validate defanging (sanity check)
+      - name: Validate defanging (sanity check)
         run: |
           set -e
 
