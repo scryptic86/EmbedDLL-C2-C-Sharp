@@ -27,7 +27,7 @@ jobs:
 
       - name: Convert DOCX → README.md (extract media to docx-media/)
         run: |
-          DOCX="EmbedDLL_C2_Dropper-Loader_FINAL.docx"
+          DOCX="EmbedDLL_C2_Dropper-Loader_FINAL_DEFANGED.docx"
           OUT="README.md"
           MEDIA_DIR="docx-media"
           rm -rf "$MEDIA_DIR"
