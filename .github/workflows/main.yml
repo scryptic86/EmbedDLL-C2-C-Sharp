@@ -37,8 +37,9 @@ jobs:
 
       - name: Defang IP addresses and URLs
         run: |
-          python3 -c "
+          cat > defang.py << 'EOF'
           import re
+          import sys
           
           def defang_text(text):
               # Defang URLs (http, https, ftp)
@@ -101,22 +102,30 @@ jobs:
               f.write('\n'.join(processed_lines))
           
           print('Defanging complete. Check for: hxxp://, [.], [@], etc.')
-          "
+          EOF
+          
+          python3 defang.py
 
       - name: Validate defanging (sanity check)
         run: |
           echo "Checking for undefanged indicators..."
           
           # Check for common undefanged patterns
-          if grep -n -i "http://\|https://\|ftp://" README.md | grep -v "hxxp://\|hxxps://\|fxp://" | grep -v "code-block\|```\|defang\|example\|example.com"; then
-            echo "WARNING: Found undefanged URLs"
-            grep -n -i "http://\|https://\|ftp://" README.md | grep -v "hxxp://\|hxxps://\|fxp://" | grep -v "code-block\|```\|defang\|example\|example.com"
+          if grep -n -i "http://" README.md | grep -v "hxxp://" | grep -v "```\|example.com" > /dev/null; then
+            echo "ERROR: Found undefanged http:// URLs"
+            grep -n -i "http://" README.md | grep -v "hxxp://" | grep -v "```\|example.com"
             exit 1
           fi
           
-          if grep -n -E "\b([0-9]{1,3}\.){3}[0-9]{1,3}\b" README.md | grep -v "\[\.\]" | grep -v "code-block\|```\|example\|127\.0\.0\.1\|0\.0\.0\.0"; then
-            echo "WARNING: Found undefanged IP addresses"
-            grep -n -E "\b([0-9]{1,3}\.){3}[0-9]{1,3}\b" README.md | grep -v "\[\.\]" | grep -v "code-block\|```\|example\|127\.0\.0\.1\|0\.0\.0\.0"
+          if grep -n -i "https://" README.md | grep -v "hxxps://" | grep -v "```\|example.com" > /dev/null; then
+            echo "ERROR: Found undefanged https:// URLs"
+            grep -n -i "https://" README.md | grep -v "hxxps://" | grep -v "```\|example.com"
+            exit 1
+          fi
+          
+          if grep -n -E "\b([0-9]{1,3}\.){3}[0-9]{1,3}\b" README.md | grep -v "\[\.\]" | grep -v "```\|127\.0\.0\.1\|0\.0\.0\.0\|example" > /dev/null; then
+            echo "ERROR: Found undefanged IP addresses"
+            grep -n -E "\b([0-9]{1,3}\.){3}[0-9]{1,3}\b" README.md | grep -v "\[\.\]" | grep -v "```\|127\.0\.0\.1\|0\.0\.0\.0\|example"
             exit 1
           fi
           
