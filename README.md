@@ -566,7 +566,7 @@ server*
 
 | Category       | Indicator                                                                                            | Type                   | Description                                                                       |
 |----------------|------------------------------------------------------------------------------------------------------|------------------------|-----------------------------------------------------------------------------------|
-| Network        | http://srv.masterchiefsgruntemporium.local:80                                                        | C2 URL                 | Hardcoded command-and-control endpoint used by the implant                        |
+| Network        | hxxp://srv\[.\]masterchiefsgruntemporium\[.\]local:80                                                | C2 URL                 | Hardcoded command-and-control endpoint used by the implant                        |
 | Network        | /en-us/index.html                                                                                    | URI Path               | Decoy HTTP path used during beaconing                                             |
 | Network        | /en-us/docs.html                                                                                     | URI Path               | Alternate decoy path for C2 communications                                        |
 | Network        | /en-us/test.html                                                                                     | URI Path               | Alternate decoy path for C2 communications                                        |
@@ -826,11 +826,11 @@ rule EmbedDLL_PowerOverwhelming_AES_C2
 
 ## Callback URLs
 
-| Domain                                      | Port |
-|---------------------------------------------|------|
-| hxxp:// srv.masterchiefsgruntemporium.local | 80   |
-|                                             |      |
-|                                             |      |
+| Domain                                              | Port |
+|-----------------------------------------------------|------|
+| hxxp:// srv\[.\]masterchiefsgruntemporium\[.\]local | 80   |
+|                                                     |      |
+|                                                     |      |
 
 ## Decompiled Code Snippets
 
