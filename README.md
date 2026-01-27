@@ -412,8 +412,6 @@ style="width:6.05052in;height:1.21677in" />
 
     2.  CookieWebClient
 
-## Stage 4: Final Covenant Implant
-
 **Notable Strings and Indicators**
 
 # Basic Dynamic Analysis
@@ -646,8 +644,6 @@ loaded at user logon*
 
 ## Stage 3: Grunt HTTP Stager
 
-## Stage 4: Final Covenant Implant
-
 # Advanced Dynamic Analysis
 
 {Screenshots and description about advanced dynamic artifacts and
@@ -708,8 +704,6 @@ server*
 | Malware Family | CookieWebClient                                                                                      | Class Name             | Custom HTTP client wrapper used for C2 communications                             |
 
 ## Stage 3: Grunt HTTP Stager
-
-## Stage 4: Final Covenant Implant
 
 Analysis Artifacts (NOT MALICIOUS)
 
