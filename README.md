@@ -282,27 +282,85 @@ style="width:6.05052in;height:1.21677in" />
 
 *Figure: Indicators of C# language and .NET Framework*
 
-**Notable Embedded Strings and Indicators**
+**Notable Strings and Indicators**
 
-**Imported functions / APIs:**
+1.  **These indicate a .NET loader:**
 
-AES_Encrypt
+    1.  v4.0.30319
 
-> AES_Decrypt
->
-> CreateEncryptor
->
-> GetEnvironmentVariable
->
-> WriteAllText
->
-> MemoryStream
+    2.  mscoree[.]dll
 
-**Suspicious Strings:**
+    3.  System[.]Reflection
+
+    4.  Assembly[.]Load
+
+2.  **Embedded Payload Indicators:**
+
+    1.  EmbedDLL[.]dll
+
+    2.  EmbedDLL
+
+    3.  \EmbedDLL[.]dll
+
+    4.  InternalName: EmbedDLL[.]dll
+
+    5.  OriginalFilename: EmbedDLL[.]dll
+
+3.  **AES Encryption of Embedded Payload Indicators:**
+
+    1.  System[.]Security[.]Cryptography
+
+    2.  RijndaelManaged
+
+    3.  Rfc2898DeriveBytes
+
+    4.  AES_Encrypt
+
+    5.  AES_Decrypt
+
+    6.  passwordBytes
+
+    7.  bytesToBeEncrypted
+
+    8.  bytesToBeDecrypted
+
+4.  **Hardcoded Password:**
+
+    1.  p0w3r0verwh3lm1ng!
+
+5.  **Large Base64 / High Entropy Blobs:**
+
+    1.  pxQRI8YJc6jVr3x45Y+ti/tT8W+3HpQHbcw1yZJQ9goNh...
+
+6.  **In-Memory Execution Indicators:**
+
+    1.  System\[.\]Reflection
+
+    2.  MemoryStream
+
+    3.  Assembly
+
+    4.  InitializeArray
+
+    5.  MethodInfo[.]Invoke (implied)
+
+7.  **Script-based Secondary Execution:**
+
+    1.  U2V0IG9TaGVsbCA9IENyZWF0ZU9iamVjdCAoIldzY3JpcHQuU2hlbGwiKSAK...
+        which converts to
+        C:\Windows\Microsoft\[.\]NET\Framework\v4.0.30319\MSBuild\[.\]exe
+
+8.  **LoL Execution Script Drop Location:**
+
+    1.  C:\Users\Public\Documents\embed\[.\]vbs
+
+9.  **Persistence Mechanism Registry Key:**
+
+    1.  HKCU\Software\Microsoft\Windows\CurrentVersion\Run
 
 ## Stage 2 – VBScript Persistent Launcher
 
-**Notable Embedded Strings and Indicators**
+**Notable Strings and Indicators**
 
 ## Stage 3: Grunt HTTP Stager
 
@@ -319,33 +377,44 @@ AES_Encrypt
 
 - **Architecture:** x64
 
-**Notable Embedded Strings and Indicators**
+**Notable Strings and Indicators**
 
-- **Hardcoded C2 endpoint:**  
-  hxxp://srv\[.\]masterchiefsgruntemporium\[.\]local:80
+1.  **Hardcoded C2 endpoint:**  
+    hxxp://srv\[.\]masterchiefsgruntemporium\[.\]local:80
 
-- **Beacon parameter format:**  
-  i=\<id\>&data={encrypted}&session=\<token\>
+2.  **Beacon parameter format:**  
+    i=\<id\>&data={encrypted}&session=\<token\>
 
-- **HTTP masquerading:**
+3.  **HTTP masquerading:**
 
-  - User-Agent: Mozilla/5.0 (Windows NT 6.1)…Chrome/41.0…
+    1.  User-Agent: Mozilla/5.0 (Windows NT 6.1)…Chrome/41.0…
 
-  - Cookie template: ASPSESSIONID={GUID}; SESSIONID=…
+    2.  Cookie template: ASPSESSIONID={GUID}; SESSIONID=…
 
-- **Encrypted message structure:**
+4.  **Encrypted message structure:**
 
-> {"GUID":"{0}","Type":{1},"Meta":"{2}","IV":"{3}",
->
-> "EncryptedMessage":"{4}","HMAC":"{5}"}
+    1.  {"GUID":"{0}","Type":{1},"Meta":"{2}","IV":"{3}",
 
-- **Certificate pinning indicators:**  
-  UseCertPinning, ValidateCert, CovenantCertHash
+    2.  "EncryptedMessage":"{4}","HMAC":"{5}"}
 
-- **Framework identifiers:**  
-  GruntStager, ExecuteStager, CookieWebClient
+5.  **Certificate pinning indicators:**
+
+    1.  ValidateCert
+
+    2.  CovenantCertHash
+
+    3.  UseCertPinning
+
+6.  **Framework identifiers:**  
+    GruntStager
+
+    1.  ExecuteStager
+
+    2.  CookieWebClient
 
 ## Stage 4: Final Covenant Implant
+
+**Notable Strings and Indicators**
 
 # Basic Dynamic Analysis
 
@@ -461,9 +530,61 @@ Total bytes: 64
 
 ## Stage 2 – VBScript Persistent Launcher
 
-## Stage 3: Grunt HTTP Stager
+## Stage 3: Covenant Framework - C2 Grunt Stager
 
-## Stage 4: Final Covenant Implant
+Figure : The implant issues an HTTP GET request to the /stream endpoint
+with a custom authorization token and session identifier.
+
+<img src="docx-media/media/image20.png"
+style="width:4.92386in;height:2.70153in" />
+
+Figure X. HTTP-based beacon request captured on the loopback interface
+while emulating a C2 server using ncat. All network indicators have been
+defanged.
+
+| Frame 20: 372 bytes on wire (2976 bits), 372 bytes captured (2976 bits) on interface \Device\NPF_Loopback, id 0 |
+|-----------------------------------------------------------------------------------------------------------------|
+| Null/Loopback                                                                                                   |
+| Internet Protocol Version 4, Src: 127\[.\]0\[.\]0\[.\]1, Dst: 127\[.\]0\[.\]0\[.\]1                             |
+| Transmission Control Protocol, Src Port: 50140, Dst Port: 5133, Seq: 1, Ack: 1, Len: 328                        |
+| Source Port: 50140                                                                                              |
+| Destination Port: 5133                                                                                          |
+| \[Stream index: 3\]                                                                                             |
+| \[Stream Packet Number: 4\]                                                                                     |
+| \[Conversation completeness: Incomplete, DATA (15)\]                                                            |
+| \[TCP Segment Len: 328\]                                                                                        |
+| Sequence Number: 1 (relative sequence number)                                                                   |
+| Sequence Number (raw): 3547991908                                                                               |
+| \[Next Sequence Number: 329 (relative sequence number)\]                                                        |
+| Acknowledgment Number: 1 (relative ack number)                                                                  |
+| Acknowledgment number (raw): 77053556                                                                           |
+| 0101 .... = Header Length: 20 bytes (5)                                                                         |
+| Flags: 0x018 (PSH, ACK)                                                                                         |
+| Window: 10233                                                                                                   |
+| \[Calculated window size: 2619648\]                                                                             |
+| \[Window size scaling factor: 256\]                                                                             |
+| Checksum: 0x5fe2 \[unverified\]                                                                                 |
+| \[Checksum Status: Unverified\]                                                                                 |
+| Urgent Pointer: 0                                                                                               |
+| \[Timestamps\]                                                                                                  |
+| \[SEQ/ACK analysis\]                                                                                            |
+| TCP payload (328 bytes)                                                                                         |
+| Hypertext Transfer Protocol                                                                                     |
+| GET /stream HTTP/1.1\r\n                                                                                        |
+| Request Method: GET                                                                                             |
+| Request URI: /stream                                                                                            |
+| Request Version: HTTP/1.1                                                                                       |
+| host: localhost:5133\r\n                                                                                        |
+| connection: keep-alive\r\n                                                                                      |
+| authorization: d623295c3e95e6c346f33d3c44f39b2b7f7a5630753f352abcc077a47f3dac5a\r\n                             |
+| Accept: text/event-stream\r\n                                                                                   |
+| Mcp-Session-Id: 0f6090c6d9b9f4ed8a2cd47ec7c92339c1267245\r\n                                                    |
+| accept-language: \*\r\n                                                                                         |
+| sec-fetch-mode: cors\r\n                                                                                        |
+| user-agent: node\r\n                                                                                            |
+| accept-encoding: gzip, deflate\r\n                                                                              |
+| \r\n                                                                                                            |
+| \[Full request URI: hxxp://localhost:5133/stream\]                                                              |
 
 # Advanced Static Analysis
 
@@ -480,17 +601,17 @@ which explains debugger errors such as *“invalid extension”* when
 attempting to run it in dnSpy. Instead, it is designed for **reflective
 or indirect loading.**
 
-<img src="docx-media/media/image20.png"
+<img src="docx-media/media/image21.png"
 style="width:6.5in;height:0.84236in" />
 
 *Figure : Hardcoded password and AES decryption of a base64 string*
 
-<img src="docx-media/media/image21.png"
+<img src="docx-media/media/image22.png"
 style="width:6.5in;height:1.67917in" />
 
 *Figure : AES encryption function*
 
-<img src="docx-media/media/image22.png"
+<img src="docx-media/media/image23.png"
 style="width:5.86051in;height:1.37345in" />
 
 *Figure : Name and location of dropped VBS script and XML file to be
@@ -532,10 +653,10 @@ loaded at user logon*
 {Screenshots and description about advanced dynamic artifacts and
 methods}
 
-<img src="docx-media/media/image23.png"
+<img src="docx-media/media/image24.png"
 style="width:6.5in;height:1.94375in" />
 
-<img src="docx-media/media/image24.png"
+<img src="docx-media/media/image25.png"
 style="width:6.5in;height:3.22986in" />
 
 # Indicators of Compromise
@@ -554,7 +675,7 @@ The full list of IOCs can be found in the Appendices.
 | API      | Assembly[.]LoadFile      | Reflection API | Stage 1 | Dynamically loads malicious DLL into memory            |
 | Crypto   | AES_Decrypt            | Function Call  | Stage 1 | Decrypts embedded encrypted payload                    |
 
-<img src="docx-media/media/image25.png"
+<img src="docx-media/media/image26.png"
 style="width:6.5in;height:2.11042in" />
 
 *Fig 3: Wireshark packet capture of initial DNS query for callback to C2
@@ -681,82 +802,6 @@ Although encrypted, C2 traffic exhibits detectable structure:
 
   - Payload entropy consistent with encryption only, without secondary
     compression layers
-
-**Strings Analysis:**
-
-1.  **These indicate a .NET loader:**
-
-v4.0.30319
-
-mscoree[.]dll
-
-System[.]Reflection
-
-Assembly[.]Load
-
-2.  **Embedded Payload Indicators:**
-
-EmbedDLL[.]dll
-
-EmbedDLL
-
-\EmbedDLL[.]dll
-
-InternalName: EmbedDLL[.]dll
-
-OriginalFilename: EmbedDLL[.]dll
-
-3.  **AES Encryption of Embedded Payload Indicators:**
-
-System[.]Security[.]Cryptography
-
-RijndaelManaged
-
-Rfc2898DeriveBytes
-
-AES_Encrypt
-
-AES_Decrypt
-
-passwordBytes
-
-bytesToBeEncrypted
-
-bytesToBeDecrypted
-
-4.  **Hardcoded Password:**
-
-p0w3r0verwh3lm1ng!
-
-5.  **Large Base64 / High Entropy Blobs:**
-
-pxQRI8YJc6jVr3x45Y+ti/tT8W+3HpQHbcw1yZJQ9goNh...
-
-6.  **In-Memory Execution Indicators:**
-
-System\[.\]Reflection
-
-MemoryStream
-
-Assembly
-
-InitializeArray
-
-MethodInfo[.]Invoke (implied)
-
-7.  **Script-based Secondary Execution:**
-
-U2V0IG9TaGVsbCA9IENyZWF0ZU9iamVjdCAoIldzY3JpcHQuU2hlbGwiKSAK... which
-converts to
-C:\Windows\Microsoft\[.\]NET\Framework\v4.0.30319\MSBuild\[.\]exe
-
-8.  **LoL Execution Script Drop Location:**
-
-C:\Users\Public\Documents\embed\[.\]vbs
-
-9.  **Persistence Mechanism Registry Key:**
-
-HKCU\Software\Microsoft\Windows\CurrentVersion\Run
 
 # Appendices
 
