@@ -40,10 +40,9 @@ January 2, 2026 \| Clinton Asprey\| v1.0
 [Stage 2 - EmbedDLL [13](#stage-1-embeddll.dll)](#stage-1-embeddll.dll)
 
 [Stage 3 – VBScript Launcher
-[15](#stage-2-vbscript-persistent-launcher)](#stage-2-vbscript-persistent-launcher)
+[15](#stage-2-vbscript-persistent-launcher-with-xml-arguments)](#stage-2-vbscript-persistent-launcher-with-xml-arguments)
 
-[Stage 4: C2 Agent
-[16](#stage-3-grunt-http-stager)](#stage-3-grunt-http-stager)
+[Stage 4: C2 Agent [16](#_Toc220233328)](#_Toc220233328)
 
 [Basic Dynamic Analysis
 [17](#basic-dynamic-analysis)](#basic-dynamic-analysis)
@@ -156,11 +155,11 @@ Real-World Equivalents: Similar loading techniques are observed in:
 
 ## Monitoring Tools & Setup
 
-- **Static Analysis:** Floss, PEStudio, Cutter
+- **Static Analysis:** Floss, PEStudio, Cutter, Detect it Easy
 
 - **Network:** Wireshark, FakeNet-NG, Inetsim
 
-- **System:** Process Monitor, API Monitor
+- **System:** Procmon64, tcpview64
 
 - **Memory:** System Informer
 
@@ -173,7 +172,7 @@ Real-World Equivalents: Similar loading techniques are observed in:
 - C2 infrastructure was simulated/isolated to prevent external
   communication
 
-- All findings reflect the DLL's capabilities when properly loaded
+- All findings reflect DLL’s capabilities when properly loaded
 
 # High-Level Technical Summary
 
@@ -204,44 +203,51 @@ initiated.
 8.  Encrypted C2 communication begins
 
 <img src="docx-media/media/image2.png"
-style="width:5.53819in;height:9in" />
+style="width:5.18056in;height:8.41881in" />
 
 # Malware Composition
 
 Malware[.]cryptlib64[.]dll consists of the following components:
 
-| File Name    | SHA256 Hash                                                      |
-|--------------|------------------------------------------------------------------|
-| EmbedDLL[.]dll | 732f235784cd2a40c82847b4700fb73175221c6ae6c5f7200a3f43f209989387 |
-| embed[.]vbs    | 66fd543f31545082cf8fcc45a6ab1094bc118c45634f2be450f84f4e5745b291 |
-| embed[.]xml    | f1548cd02784606c8abac865abf5ed6220d34eea88c7a5715e0183d7f050f4ab |
+| File Name        | SHA256 Hash                                                      |
+|------------------|------------------------------------------------------------------|
+| EmbedDLL[.]dll     | 732f235784cd2a40c82847b4700fb73175221c6ae6c5f7200a3f43f209989387 |
+| embed[.]vbs        | 66fd543f31545082cf8fcc45a6ab1094bc118c45634f2be450f84f4e5745b291 |
+| embed[.]xml        | f1548cd02784606c8abac865abf5ed6220d34eea88c7a5715e0183d7f050f4ab |
+| bk1ha411[.]4nu[.]exe | b8e0ec99c18bf28062ffb9bb385c0109a27af71d332bc7fc00580d88d3a30721 |
 
 ## EmbedDLL[.]dll
 
 <img src="docx-media/media/image3.png"
 style="width:0.94175in;height:0.94175in" />
 
-*Figure 1: The hidden file name of Malware[.]cryptlib64[.]dll is
-EmbedDLL[.]dll which is detonated in this lab with rundll32.*
+*Figure 1: The hidden real file name of Malware[.]cryptlib64[.]dll is
+EmbedDLL[.]dll*
 
 <span id="_Toc220233322" class="anchor"></span>embed[.]vbs
 
 <img src="docx-media/media/image4.png"
 style="width:6.5in;height:1.89583in" />
 
-*Figure 2: embed[.]vbs VBscript dropped by EmbedDLL[.]dll and ran upon user
-login*
+*Figure 2: VBscript dropped by EmbedDLL[.]dll and ran upon user login via
+‘Run’ registry key*
 
-<span id="_Toc220233323" class="anchor"></span>embed\[.\]xml
+<span id="_Toc220233323" class="anchor"></span>embed[.]xml
 
 <img src="docx-media/media/image5.png"
 style="width:6.5in;height:2.84375in" />
 
 *Figure 3: The XML payload is dropped in Public user folder*
 
-# Basic Static Analysis
+bk1ha411[.]4nu[.]exe
 
-{Screenshots and description about basic static artifacts and methods}
+<img src="docx-media/media/image6.png"
+style="width:1.06255in;height:0.93755in" />
+
+*Figure 4: Covenant Framework Grunt Stager for command-and-control
+communication executed in-memory after being built*
+
+# Basic Static Analysis
 
 ## Stage 1 – EmbedDLL[.]dll
 
@@ -267,20 +273,15 @@ style="width:6.5in;height:2.84375in" />
 
 - **Anti-analysis techniques observed:** Hidden File Name (EmbedDLL[.]dll)
 
-<img src="docx-media/media/image6.png"
+<img src="docx-media/media/image7.png"
 style="width:6.25888in;height:1.82516in" />
 
-*Figure : Hidden file name*
-
-<img src="docx-media/media/image7.png"
-style="width:6.5in;height:3.8875in" />
-
-*Figure : .NET module detected*
+*Figure 5: Hidden file name of Malware[.]cryptlib64[.]dll*
 
 <img src="docx-media/media/image8.png"
 style="width:6.05052in;height:1.21677in" />
 
-*Figure: Indicators of C# language and .NET Framework*
+*Figure 6: Indicators of C# language and .NET Framework*
 
 **Notable Strings and Indicators**
 
@@ -358,16 +359,43 @@ style="width:6.05052in;height:1.21677in" />
 
     1.  HKCU\Software\Microsoft\Windows\CurrentVersion\Run
 
-## Stage 2 – VBScript Persistent Launcher
+## Stage 2 – VBScript Persistent Launcher with XML arguments
+
+- **Filename:** embed[.]vbs
+
+- **SHA256:**
+  66fd543f31545082cf8fcc45a6ab1094bc118c45634f2be450f84f4e5745b291
+
+- **File size: 181 bytes**
+
+- **Entropy:** 5.20168
+
+- **File type:** VBScript Script File
+
+- **Obfuscation techniques observed:** Indirect execution of MSBuild[.]exe
 
 **Notable Strings and Indicators**
 
-## Stage 3: Grunt HTTP Stager
+- Set oShell = CreateObject ("Wscript[.]Shell")
+
+- Dim strArgs
+
+- strArgs = "C:\Windows\Microsoft[.]NET\Framework\v4.0.30319\MSBuild[.]exe
+  C:\Users\Public\embed[.]xml"
+
+- oShell[.]Run strArgs, 0, false
+
+**Filename:** embed[.]xml
+
+**SHA256:**
+f1548cd02784606c8abac865abf5ed6220d34eea88c7a5715e0183d7f050f4ab
+
+## Stage 3: Covenant Framework - C2 Grunt Stager
 
 - Filen**ame:** bk1ha411[.]4nu[.]exe
 
 - **SHA256:**
-  B8E0EC99C18BF28062FFB9BB385C0109A27AF71D332BC7FC00580D88D3A30721
+  <span class="smallcaps">b8e0ec99c18bf28062ffb9bb385c0109a27af71d332bc7fc00580d88d3a30721</span>
 
 - **Entropy:** 5.181
 
@@ -418,23 +446,12 @@ style="width:6.05052in;height:1.21677in" />
 
 {Screenshots and description about basic dynamic artifacts and methods}
 
+## Stage 1 – EmbedDLL[.]dll
+
 This DLL functions as an encrypted dropper-loader responsible for
 decrypting, staging, and executing a secondary payload via MSBuild,
-while establishing user-level persistence.
-
-During execution, the malware encrypts command-and-control (C2)
-communications using AES-256 in CBC mode. Key material is derived via
-PBKDF2 with SHA-1 (1,000 iterations) and a hard-coded password encoded
-as UTF-16LE. Network traffic captured from the sample shows that
-encrypted messages are Base64-encoded prior to transmission.
-
-Once decrypted, the C2 payload does not conform to any standard
-serialization or compression format. Instead, it consists of a
-proprietary binary protocol composed of fixed-length fields. These
-fields include a session identifier resembling a GUID, followed by
-structured metadata such as opcode values, host identifiers, and status
-or command data. No evidence of secondary compression or obfuscation is
-present beyond the initial AES encryption layer.
+while establishing user-level persistence. It must be executed via
+another process and cannot run standalone.
 
 <img src="docx-media/media/image10.png"
 style="width:6.5in;height:1.51806in" />
@@ -451,89 +468,33 @@ style="width:6.5in;height:1.73125in" />
 *Figure : Persistence registry key created after initial EmbedDLL[.]dll
 execution*
 
-<img src="docx-media/media/image13.png"
-style="width:6.5in;height:2.37083in" />
-
-*Figure : Wireshark packet capture showing HTTP call to C2 server*
-
-<img src="docx-media/media/image14.png"
-style="width:6.5in;height:2.14514in" />
-
-*Figure : Successful request on port 80*
+## Stage 2 – VBScript Persistent Launcher
 
 Each time the infected machine’s user logs back in, embed[.]vbs is
 executed with embed[.]xml arguments and the C2 server is contacted.
 VBScript is used to launch a system shell and run MSBuild indirectly to
 evade detection.
 
-<img src="docx-media/media/image15.png"
-style="width:6.5in;height:1.30764in" />
-
-<img src="docx-media/media/image16.png"
-style="width:6.5in;height:1.9125in" />
-
-<img src="docx-media/media/image17.png"
-style="width:6.5in;height:0.94306in" />
-
-*Figure : XML arguments for embed\[.\]vbs to run MSBuild*
-
-<img src="docx-media/media/image18.png"
-style="width:6.5in;height:2.975in" />
-
-*Figure : Ncat and Wireshark captured C2 beacon for decryption*
-
-<img src="docx-media/media/image19.png"
-style="width:6.44478in;height:1.52786in" />
-
-Figure : Exported HTML POST file from PCAP
-
-After decrypting the message portion in this HTTP POST we can identify
-these possible parts:
-
-Total bytes: 64
-
-> GUID : 4f1113988d3b14972c77
->
-> Opcode : 0x154615aa
->
-> Payload length: 50
->
-> Beacon ID : 0x8938d318 (2302202648)
->
-> Uptime low : 0x38a4de1c (950328860)
->
-> Uptime high : 0xdd007378 (3707794296)
->
-> Flags : 0x5d30d302 (1563480834)
->
-> OS version : 0x0d221e46 (220339782)
->
-> PID : 0x1db5043a (498402362)
->
-> PPID : 0xd584cc5d (3582250077)
->
-> Arch : 0x981f4c53 (2552187987)
->
-> Privilege : 0x8e487bff (2387115007)
->
-> Net status : 0x162a26c5 (371861189)
->
-> Unknown 1 : 0x30ca19da (818551258)
->
-> Unknown 2 : 0x3c6764c9 (1013408969)
->
-> Checksum : 0x00005a13 (23059)
-
-## Stage 1 – EmbedDLL[.]dll
-
-## Stage 2 – VBScript Persistent Launcher
-
 ## Stage 3: Covenant Framework - C2 Grunt Stager
+
+During execution, the malware encrypts command-and-control (C2)
+communications using AES-256 in CBC mode. Key material is derived via
+PBKDF2 with SHA-1 (1,000 iterations) and a hard-coded password encoded
+as UTF-16LE. Network traffic captured from the sample shows that
+encrypted messages are Base64-encoded prior to transmission.
+
+Once decrypted, the C2 payload does not conform to any standard
+serialization or compression format. Instead, it consists of a
+proprietary binary protocol composed of fixed-length fields. These
+fields include a session identifier resembling a GUID, followed by
+structured metadata such as opcode values, host identifiers, and status
+or command data. No evidence of secondary compression or obfuscation is
+present beyond the initial AES encryption layer.
 
 Figure : The implant issues an HTTP GET request to the /stream endpoint
 with a custom authorization token and session identifier.
 
-<img src="docx-media/media/image20.png"
+<img src="docx-media/media/image13.png"
 style="width:4.92386in;height:2.70153in" />
 
 Figure X. HTTP-based beacon request captured on the loopback interface
@@ -584,14 +545,68 @@ defanged.
 | \r\n                                                                                                            |
 | \[Full request URI: hxxp://localhost:5133/stream\]                                                              |
 
+<img src="docx-media/media/image14.png"
+style="width:6.5in;height:2.37083in" />
+
+*Figure : Wireshark packet capture showing HTTP call to C2 server*
+
+<img src="docx-media/media/image15.png"
+style="width:6.5in;height:2.14514in" />
+
+*Figure : Successful request on port 80*
+
+<img src="docx-media/media/image16.png"
+style="width:6.5in;height:2.975in" />
+
+*Figure : Ncat and Wireshark captured C2 beacon for decryption*
+
+<img src="docx-media/media/image17.png"
+style="width:6.44478in;height:1.52786in" />
+
+Figure : Exported HTML POST file from PCAP
+
+After decrypting the message portion in this HTTP POST we can identify
+these possible parts:
+
+Total bytes: 64
+
+> GUID : 4f1113988d3b14972c77
+>
+> Opcode : 0x154615aa
+>
+> Payload length: 50
+>
+> Beacon ID : 0x8938d318 (2302202648)
+>
+> Uptime low : 0x38a4de1c (950328860)
+>
+> Uptime high : 0xdd007378 (3707794296)
+>
+> Flags : 0x5d30d302 (1563480834)
+>
+> OS version : 0x0d221e46 (220339782)
+>
+> PID : 0x1db5043a (498402362)
+>
+> PPID : 0xd584cc5d (3582250077)
+>
+> Arch : 0x981f4c53 (2552187987)
+>
+> Privilege : 0x8e487bff (2387115007)
+>
+> Net status : 0x162a26c5 (371861189)
+>
+> Unknown 1 : 0x30ca19da (818551258)
+>
+> Unknown 2 : 0x3c6764c9 (1013408969)
+>
+> Checksum : 0x00005a13 (23059)
+
 # Advanced Static Analysis
 
-{Screenshots and description about findings during advanced static
-analysis}
-
-Advanced static analysis of the malware reveals a **multi-stage dropper
-and loader** implemented as a **.NET DLL** with deliberate obfuscation
-and nonstandard execution behavior to hinder debugging and automated
+Further analysis of the malware reveals a **multi-stage dropper and
+loader** implemented as a **.NET DLL** with deliberate obfuscation and
+nonstandard execution behavior to hinder debugging and automated
 analysis.
 
 The DLL is not intended to be executed directly via standard loaders,
@@ -599,21 +614,57 @@ which explains debugger errors such as *“invalid extension”* when
 attempting to run it in dnSpy. Instead, it is designed for **reflective
 or indirect loading.**
 
-<img src="docx-media/media/image21.png"
-style="width:6.5in;height:0.84236in" />
+## Stage 1 – EmbedDLL[.]dll
 
-*Figure : Hardcoded password and AES decryption of a base64 string*
+Due to the presence of managed metadata and
+PrivateImplementationDetails, dnSpy x64 was used to analyze the Common
+Language Runtime (CLR) code paths. Cutter was used to analyze unmanaged
+components and confirm execution transitions between managed and native
+code.
+
+Disassembly of the .text_0x7200 section reveals instruction sequences
+inconsistent with valid x64 execution, including nonsensical memory
+operations, non-canonical absolute addresses, invalid opcodes, and the
+absence of standard function prologue/epilogue patterns.
+
+Figure : Disassembly in Cutter reveals non-executable data placed in an
+executable section with no stack setup and no inbound x-refs
+
+<img src="docx-media/media/image18.png"
+style="width:5.89614in;height:1.70842in" />
+
+The region is associated with PrivateImplementationDetails::embed, a
+construct commonly used in managed binaries to store embedded data
+rather than executable logic. These characteristics indicate the section
+contains embedded or encrypted data intentionally placed in an
+executable segment to hinder static analysis, rather than a legitimate
+code path.
+
+Figure : Cutter decompiler shows garbage data that is probably part of
+the encrypted embedded payload.
+
+<img src="docx-media/media/image19.png"
+style="width:6.38922in;height:4.63913in" />
+
+## Stage 2 – VBScript Persistent Launcher
+
+Figure : Visual Code shows Wscript[.]Shell being created to indirectly run
+MSBuild with arguments from the dropped XML file in a hidden window
+
+<img src="docx-media/media/image20.png"
+style="width:6.5in;height:1.30764in" />
+
+*Figure : XML arguments for embed\[.\]vbs to run MSBuild to create the
+C2 agent from compressed base64 code using reflection to enable fileless
+execution and evade antivirus detection*
+
+<img src="docx-media/media/image21.png"
+style="width:6.5in;height:1.9125in" />
 
 <img src="docx-media/media/image22.png"
-style="width:6.5in;height:1.67917in" />
+style="width:6.5in;height:0.94306in" />
 
-*Figure : AES encryption function*
-
-<img src="docx-media/media/image23.png"
-style="width:5.86051in;height:1.37345in" />
-
-*Figure : Name and location of dropped VBS script and XML file to be
-loaded at user logon*
+## Stage 3: Covenant Framework - C2 Grunt Stager
 
 **Static Analysis Key Findings**
 
@@ -638,22 +689,35 @@ loaded at user logon*
   packed and parsed messages instead of common serialization formats,
   indicating deliberate evasion of signature-based detection.
 
-## Stage 1 – EmbedDLL[.]dll
-
-## Stage 2 – VBScript Persistent Launcher
-
-## Stage 3: Grunt HTTP Stager
-
 # Advanced Dynamic Analysis
 
 {Screenshots and description about advanced dynamic artifacts and
 methods}
 
+## Stage 1 – EmbedDLL[.]dll
+
+<img src="docx-media/media/image23.png"
+style="width:6.5in;height:0.84236in" />
+
+*Figure : Hardcoded password and AES decryption of a base64 string*
+
 <img src="docx-media/media/image24.png"
-style="width:6.5in;height:1.94375in" />
+style="width:6.5in;height:1.67917in" />
+
+*Figure : AES encryption function*
 
 <img src="docx-media/media/image25.png"
+style="width:5.86051in;height:1.37345in" />
+
+*Figure : Name and location of dropped VBS script and XML file to be
+loaded at user logon*
+
+<img src="docx-media/media/image26.png"
 style="width:6.5in;height:3.22986in" />
+
+## Stage 2 – VBScript Persistent Launcher
+
+## Stage 3: Covenant Framework - C2 Grunt Stager
 
 # Indicators of Compromise
 
@@ -671,7 +735,7 @@ The full list of IOCs can be found in the Appendices.
 | API      | Assembly[.]LoadFile      | Reflection API | Stage 1 | Dynamically loads malicious DLL into memory            |
 | Crypto   | AES_Decrypt            | Function Call  | Stage 1 | Decrypts embedded encrypted payload                    |
 
-<img src="docx-media/media/image26.png"
+<img src="docx-media/media/image27.png"
 style="width:6.5in;height:2.11042in" />
 
 *Fig 3: Wireshark packet capture of initial DNS query for callback to C2
@@ -703,7 +767,7 @@ server*
 | Malware Family | ExecuteStager                                                                                        | Function Name          | Primary routine responsible for staging payload execution                         |
 | Malware Family | CookieWebClient                                                                                      | Class Name             | Custom HTTP client wrapper used for C2 communications                             |
 
-## Stage 3: Grunt HTTP Stager
+## Stage 3: Covenant Framework - C2 Grunt Stager
 
 Analysis Artifacts (NOT MALICIOUS)
 
